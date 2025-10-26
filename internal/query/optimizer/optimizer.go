@@ -6,11 +6,13 @@ import (
 	"github.com/evanxg852000/foxdb/internal/catalog"
 	"github.com/evanxg852000/foxdb/internal/query/optimizer/physical"
 	"github.com/evanxg852000/foxdb/internal/query/planner"
+	"github.com/evanxg852000/foxdb/internal/query/planner/logical"
+	"github.com/evanxg852000/foxdb/internal/storage"
 	"github.com/evanxg852000/foxdb/internal/types"
 )
 
 type PhysicalPlan interface {
-	Execute(ctx context.Context) (*types.DataChunk, error)
+	Execute(ctx context.Context, catalog *catalog.RootCatalog, storage *storage.KvStorage) (*types.DataChunk, error)
 	GetSchema() *types.DataSchema
 }
 
@@ -27,8 +29,14 @@ func NewOptimizer(catalog *catalog.RootCatalog, stats map[string]interface{}) *O
 }
 
 func (o *Optimizer) Optimize(logicalPlan planner.LogicalPlan) (PhysicalPlan, error) {
+	//handle utility statements
+	switch plan := logicalPlan.(type) {
+	case *logical.CreateSchemaPlan:
+		return physical.NewUtilityPlan(plan), nil
+	}
+
 	//TODO: implement a full optimization process
-	schema, _ := o.catalog.GetSchema("todo")
-	table, _ := schema.GetTable("todo")
-	return physical.NewScanExec(table), nil
+	schema := o.catalog.GetSchema("todo")
+	table := schema.GetTable("todo")
+	return physical.NewScan(table), nil
 }

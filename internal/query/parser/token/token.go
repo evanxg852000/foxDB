@@ -145,8 +145,47 @@ func (tt TokenType) String() string {
 		return "NULL"
 	case SELECT:
 		return "SELECT"
+	case INSERT:
+		return "INSERT"
+	case UPDATE:
+		return "UPDATE"
+	case DELETE:
+		return "DELETE"
+	case CREATE:
+		return "CREATE"
+	case DROP:
+		return "DROP"
+	case SCHEMA:
+		return "SCHEMA"
+	case TABLE:
+		return "TABLE"
+	case INDEX:
+		return "INDEX"
+	case AND:
+		return "AND"
+	case OR:
+		return "OR"
+	case PRIMARY:
+		return "PRIMARY"
+	case KEY:
+		return "KEY"
+	case IF:
+		return "IF"
+	case NOT:
+		return "NOT"
+	case UNIQUE:
+		return "UNIQUE"
+	case INT_TYPE:
+		return "INT_TYPE"
+	case FLOAT_TYPE:
+		return "FLOAT_TYPE"
+	case BOOL_TYPE:
+		return "BOOL_TYPE"
+	case TEXT_TYPE:
+		return "TEXT_TYPE"
+	default:
+		return "UNKNOWN"
 	}
-	return "UNKNOWN"
 }
 
 type Token struct {
@@ -155,20 +194,34 @@ type Token struct {
 }
 
 var keywords = map[string]TokenType{
-	"true":   TRUE,
-	"false":  FALSE,
-	"null":   NULL,
-	"create": CREATE,
-	"drop":   DROP,
-	"table":  TABLE,
-	"index":  INDEX,
-	"insert": INSERT,
-	"select": SELECT,
-	"update": UPDATE,
-	"delete": DELETE,
+	"true":    TRUE,
+	"false":   FALSE,
+	"null":    NULL,
+	"create":  CREATE,
+	"drop":    DROP,
+	"schema":  SCHEMA,
+	"table":   TABLE,
+	"index":   INDEX,
+	"insert":  INSERT,
+	"select":  SELECT,
+	"update":  UPDATE,
+	"delete":  DELETE,
+	"and":     AND,
+	"or":      OR,
+	"primary": PRIMARY,
+	"key":     KEY,
+	"if":      IF,
+	"not":     NOT,
+	"unique":  UNIQUE,
+	"exists":  EXISTS,
+	"int":     INT_TYPE,
+	"float":   FLOAT_TYPE,
+	"bool":    BOOL_TYPE,
+	"text":    TEXT_TYPE,
 }
 
 func LookupIdentifier(ident string) TokenType {
+	ident = strings.ToLower(ident)
 	if tok, ok := keywords[ident]; ok {
 		return tok
 	}

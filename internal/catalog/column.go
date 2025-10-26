@@ -4,6 +4,12 @@ import (
 	"github.com/evanxg852000/foxdb/internal/types"
 )
 
+var (
+	NoConstraint      = Constraint{}
+	UniqueConstraint  = Constraint{Unique: true, NotNull: true}
+	NotNullConstraint = Constraint{NotNull: true}
+)
+
 type Constraint struct {
 	Unique  bool
 	NotNull bool

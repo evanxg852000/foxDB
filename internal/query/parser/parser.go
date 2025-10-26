@@ -107,7 +107,7 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 		p.nextToken()
 		return true
 	} else {
-		p.peekError(t)
+		p.peekTokenError(t)
 		return false
 	}
 }
@@ -116,9 +116,13 @@ func (p *Parser) Errors() []string {
 	return p.errors
 }
 
-func (p *Parser) peekError(t token.TokenType) {
-	msg := fmt.Sprintf("expected next token to be %s, got %s instead",
-		t, p.peekToken.Type)
+func (p *Parser) currentTokenError(t token.TokenType) {
+	msg := fmt.Sprintf("expected current token to be %s, got %s instead", t, p.currentToken.Type)
+	p.errors = append(p.errors, msg)
+}
+
+func (p *Parser) peekTokenError(t token.TokenType) {
+	msg := fmt.Sprintf("expected next token to be %s, got %s instead", t, p.peekToken.Type)
 	p.errors = append(p.errors, msg)
 }
 
@@ -182,13 +186,15 @@ func (p *Parser) parseCreateSchemaStatement() ast.Statement {
 	IfNotExists := false
 	if p.currentToken.Type == token.IF {
 		p.nextToken() // consume 'IF'
-		if p.currentToken.Type != token.NOT {
-			p.errors = append(p.errors, fmt.Sprintf("expected NOT after IF, got %s instead", p.currentToken.Type))
+
+		if !p.currentTokenIs(token.NOT) {
+			p.currentTokenError(token.NOT)
 			return nil
 		}
 		p.nextToken() // consume 'NOT'
-		if p.currentToken.Type != token.EXISTS {
-			p.errors = append(p.errors, fmt.Sprintf("expected EXISTS after NOT, got %s instead", p.currentToken.Type))
+
+		if !p.currentTokenIs(token.EXISTS) {
+			p.currentTokenError(token.EXISTS)
 			return nil
 		}
 		p.nextToken() // consume 'EXISTS'
@@ -196,15 +202,15 @@ func (p *Parser) parseCreateSchemaStatement() ast.Statement {
 		IfNotExists = true
 	}
 
-	if p.currentToken.Type != token.IDENT {
-		p.errors = append(p.errors, fmt.Sprintf("expected schema name after CREATE SCHEMA, got %s instead", p.currentToken.Type))
+	if !p.currentTokenIs(token.IDENT) {
+		p.currentTokenError(token.IDENT)
 		return nil
 	}
 	schemaName := p.currentToken.Literal
 	p.nextToken() // consume schema name
 
 	if !p.currentTokenIs(token.SEMICOLON) {
-		p.errors = append(p.errors, fmt.Sprintf("expected SEMICOLON after CREATE SCHEMA, got %s instead", p.currentToken.Type))
+		p.currentTokenError(token.SEMICOLON)
 		return nil
 	}
 
@@ -256,7 +262,7 @@ func (p *Parser) parseCreateTableStatement() ast.Statement {
 		p.nextToken() // consume data type
 
 		constraint := ast.Constraint{}
-		for p.currentToken.Type != token.COMMA || p.currentToken.Type != token.RPAREN {
+		for p.currentToken.Type != token.COMMA && p.currentToken.Type != token.RPAREN {
 			if p.currentToken.Type == token.PRIMARY {
 				p.nextToken() // consume PRIMARY
 				if p.currentToken.Type != token.KEY {

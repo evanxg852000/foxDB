@@ -4,14 +4,15 @@ import (
 	"context"
 
 	"github.com/evanxg852000/foxdb/internal/catalog"
+	"github.com/evanxg852000/foxdb/internal/storage"
 	"github.com/evanxg852000/foxdb/internal/types"
 )
 
-type ScanExec struct {
+type Scan struct {
 	schema *types.DataSchema
 }
 
-func NewScanExec(table *catalog.Table) *ScanExec {
+func NewScan(table *catalog.Table) *Scan {
 	columns := make([]types.DataColumn, len(table.ListColumns()))
 	for i, col := range table.ListColumns() {
 		columns[i] = types.DataColumn{
@@ -22,15 +23,15 @@ func NewScanExec(table *catalog.Table) *ScanExec {
 	schema := &types.DataSchema{
 		Columns: columns,
 	}
-	return &ScanExec{
+	return &Scan{
 		schema: schema,
 	}
 }
 
-func (s *ScanExec) Execute(ctx context.Context) (*types.DataChunk, error) {
+func (s *Scan) Execute(ctx context.Context, catalog *catalog.RootCatalog, storage *storage.KvStorage) (*types.DataChunk, error) {
 	return types.NewChunk(s.schema), nil
 }
 
-func (s *ScanExec) GetSchema() *types.DataSchema {
+func (s *Scan) GetSchema() *types.DataSchema {
 	return s.schema
 }

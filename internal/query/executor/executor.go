@@ -24,5 +24,5 @@ func NewExecutor(storage *storage.KvStorage, catalog *catalog.RootCatalog, plan 
 }
 
 func (e *Executor) Execute(ctx context.Context) (*types.DataChunk, error) {
-	return e.plan.Execute(ctx)
+	return e.plan.Execute(ctx, e.catalog, e.storage)
 }

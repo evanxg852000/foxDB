@@ -1,6 +1,8 @@
 package planner
 
 import (
+	"fmt"
+
 	"github.com/evanxg852000/foxdb/internal/catalog"
 	"github.com/evanxg852000/foxdb/internal/query/parser/ast"
 	"github.com/evanxg852000/foxdb/internal/query/planner/logical"
@@ -23,6 +25,11 @@ func NewPlanner(catalog *catalog.RootCatalog) *Planner {
 }
 
 func (p *Planner) Plan(queryAst ast.Statement) (LogicalPlan, error) {
-	//TODO: handle different statement types
-	return logical.NewCreateTablePlan(queryAst.(*ast.CreateTableStatement)), nil
+	switch stmt := queryAst.(type) {
+	case *ast.CreateSchemaStatement:
+		return logical.NewCreateSchemaPlan(stmt), nil
+
+	default:
+		return nil, fmt.Errorf("unsupported statement type: %T", queryAst)
+	}
 }
